@@ -1,7 +1,8 @@
 package com.tavodin.dscatalog.services;
 
-import com.tavodin.dscatalog.repositories.CategoryRepository;
+import com.tavodin.dscatalog.dto.CategoryDTO;
 import com.tavodin.dscatalog.entities.Category;
+import com.tavodin.dscatalog.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +16,9 @@ public class CategoryService {
     private CategoryRepository repository;
 
     @Transactional(readOnly = true)
-    public List<Category> findAll() {
-        return repository.findAll();
+    public List<CategoryDTO> findAll() {
+        List<Category> list = repository.findAll();
+        return list.stream().map(CategoryDTO::new).toList();
     }
 
 }
