@@ -3,8 +3,8 @@ package com.tavodin.dscatalog.services;
 import com.tavodin.dscatalog.dto.CategoryDTO;
 import com.tavodin.dscatalog.entities.Category;
 import com.tavodin.dscatalog.repositories.CategoryRepository;
-import com.tavodin.dscatalog.services.exceptions.EntityNotFoundException;
-import org.springframework.beans.BeanUtils;
+import com.tavodin.dscatalog.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +26,7 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryDTO findById(Long id) {
         Category category = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Entidade não encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Entidade não encontrada"));
         return new CategoryDTO(category);
     }
 
@@ -36,5 +36,17 @@ public class CategoryService {
         entity.setName(dto.getName());
         entity = repository.save(entity);
         return new CategoryDTO(entity);
+    }
+
+    @Transactional
+    public CategoryDTO update(Long id, CategoryDTO dto) {
+        try {
+            Category entity = repository.getReferenceById(id);
+            entity.setName(dto.getName());
+            entity = repository.save(entity);
+            return new CategoryDTO(entity);
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Id not found " + id);
+        }
     }
 }
