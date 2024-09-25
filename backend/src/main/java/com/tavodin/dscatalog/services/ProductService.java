@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class ProductService {
 
@@ -35,9 +37,9 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
-        Product product = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Entidade não encontrada"));
-        return new ProductDTO(product, product.getCategories());
+        Optional<Product> obj = repository.findById(id);
+        Product entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entidade não encontrada"));
+        return new ProductDTO(entity, entity.getCategories());
     }
 
     @Transactional
