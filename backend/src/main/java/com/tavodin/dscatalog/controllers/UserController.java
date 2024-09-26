@@ -5,6 +5,7 @@ import com.tavodin.dscatalog.dto.UserDTO;
 import com.tavodin.dscatalog.dto.UserInsertDTO;
 import com.tavodin.dscatalog.services.ProductService;
 import com.tavodin.dscatalog.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +33,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> insert(@RequestBody UserInsertDTO dtoRequest) {
+    public ResponseEntity<UserDTO> insert(@Valid @RequestBody UserInsertDTO dtoRequest) {
         UserDTO dto = service.insert(dtoRequest);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(dto.getId()).toUri();
@@ -40,7 +41,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UserInsertDTO dtoRequest) {
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserInsertDTO dtoRequest) {
         return ResponseEntity.ok(service.update(id, dtoRequest));
     }
 
