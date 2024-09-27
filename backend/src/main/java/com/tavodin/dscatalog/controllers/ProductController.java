@@ -2,6 +2,8 @@ package com.tavodin.dscatalog.controllers;
 
 import com.tavodin.dscatalog.dto.ProductDTO;
 import com.tavodin.dscatalog.services.ProductService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,9 @@ public class ProductController {
 
     @Autowired
     private ProductService service;
+
+    @Autowired
+    HttpServletRequest request;
 
     @GetMapping
     public ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable) {
