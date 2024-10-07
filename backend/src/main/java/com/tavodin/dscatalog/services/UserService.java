@@ -1,12 +1,12 @@
 package com.tavodin.dscatalog.services;
 
-import com.tavodin.dscatalog.dto.*;
-import com.tavodin.dscatalog.entities.Category;
-import com.tavodin.dscatalog.entities.Product;
+import com.tavodin.dscatalog.dto.RoleDTO;
+import com.tavodin.dscatalog.dto.UserDTO;
+import com.tavodin.dscatalog.dto.UserInsertDTO;
+import com.tavodin.dscatalog.dto.UserUpdateDTO;
 import com.tavodin.dscatalog.entities.Role;
 import com.tavodin.dscatalog.entities.User;
-import com.tavodin.dscatalog.repositories.CategoryRepository;
-import com.tavodin.dscatalog.repositories.ProductRepository;
+import com.tavodin.dscatalog.projection.UserDetailsProjection;
 import com.tavodin.dscatalog.repositories.RoleRepository;
 import com.tavodin.dscatalog.repositories.UserRepository;
 import com.tavodin.dscatalog.services.exceptions.DataBaseException;
@@ -16,15 +16,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository repository;
@@ -33,7 +37,7 @@ public class UserService {
     private RoleRepository roleRepository;
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public Page<UserDTO> findAll(Pageable pageable) {
@@ -92,5 +96,22 @@ public class UserService {
             Role role = roleRepository.getReferenceById(roleDTO.getId());
             entity.getRoles().add(role);
         }
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        List<UserDetailsProjection> result = repository.searchUserAndRolesByEmail(username);
+        if (result.size() == 0) {
+            throw new UsernameNotFoundException("Email not found");
+        }
+
+        User user = new User();
+        user.setEmail(result.get(0).getUsername());
+        user.setPassword(result.get(0).getPassword());
+        for (UserDetailsProjection projection : result) {
+            user.addRole(new Role(projection.getRoleId(), projection.getAuthority()));
+        }
+
+        return user;
     }
 }

@@ -8,11 +8,11 @@ import com.tavodin.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class CategoryService {
@@ -21,9 +21,9 @@ public class CategoryService {
     private CategoryRepository repository;
 
     @Transactional(readOnly = true)
-    public Page<CategoryDTO> findAll(Pageable pageable) {
-        Page<Category> page = repository.findAll(pageable);
-        return page.map(CategoryDTO::new);
+    public List<CategoryDTO> findAll() {
+        List<Category> page = repository.findAll();
+        return page.stream().map(CategoryDTO::new).toList();
     }
 
     @Transactional(readOnly = true)

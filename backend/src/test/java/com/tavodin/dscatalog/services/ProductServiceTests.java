@@ -95,7 +95,7 @@ public class ProductServiceTests {
     @Test
     public void findAllPageShouldReturnPage() {
         Pageable pageable = PageRequest.of(0, 10);
-        Page<ProductDTO> result = service.findAll(pageable);
+        Page<ProductDTO> result = service.findAllPaged(pageable);
 
         Assertions.assertNotNull(result);
         Mockito.verify(repository).findAll(pageable);
