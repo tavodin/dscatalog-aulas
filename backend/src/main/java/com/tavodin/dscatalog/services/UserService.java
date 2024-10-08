@@ -39,10 +39,19 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private AuthService authService;
+
     @Transactional(readOnly = true)
     public Page<UserDTO> findAll(Pageable pageable) {
         Page<User> page = repository.findAll(pageable);
         return page.map(UserDTO::new);
+    }
+
+    @Transactional(readOnly = true)
+    public UserDTO findyProfile() {
+        User entity = authService.authenticated();
+        return new UserDTO(entity);
     }
 
     @Transactional(readOnly = true)
@@ -51,11 +60,15 @@ public class UserService implements UserDetailsService {
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entidade não encontrada"));
         return new UserDTO(entity);
     }
-
     @Transactional
     public UserDTO insert(UserInsertDTO dto) {
         User entity = new User();
         copyDtoToEntity(dto, entity);
+
+        entity.getRoles().clear();
+        Role role = roleRepository.findByAuthority("ROLE_OPERATOR");
+        entity.getRoles().add(role);
+
         entity.setPassword(passwordEncoder.encode(dto.getPassword()));
         entity = repository.save(entity);
         return new UserDTO(entity);
